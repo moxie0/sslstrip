@@ -59,7 +59,6 @@ class URLMonitor:
         portIndex   = host.find(":")
 
         if (portIndex != -1):
-            print "Found portIndex for url: " + url
             host = host[0:portIndex]
             port = host[portIndex+1:]
             if len(port) == 0:
