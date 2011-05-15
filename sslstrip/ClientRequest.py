@@ -83,6 +83,7 @@ class ClientRequest(Request):
         return "lock.ico"        
 
     def handleHostResolvedSuccess(self, address):
+        logging.debug("Resolved host successfully: %s -> %s" % (self.getHeader('host'), address))
         host              = self.getHeader("host")
         headers           = self.cleanHeaders()
         client            = self.getClientIP()
@@ -103,25 +104,28 @@ class ClientRequest(Request):
             self.sendSpoofedFaviconResponse()
         elif (self.urlMonitor.isSecureLink(client, url)):
             logging.debug("Sending request via SSL...")
-            self.proxyViaSSL(host, self.method, path, postData, headers,
+            self.proxyViaSSL(address, self.method, path, postData, headers,
                              self.urlMonitor.getSecurePort(client, url))
         else:
             logging.debug("Sending request via HTTP...")
-            self.proxyViaHTTP(host, self.method, path, postData, headers)
+            self.proxyViaHTTP(address, self.method, path, postData, headers)
 
     def handleHostResolvedError(self, error):
-        logging.warning("Host resolution error: " + error)
-        self.finished()
+        logging.warning("Host resolution error: " + str(error))
+        self.finish()
 
     def resolveHost(self, host):
         address = self.dnsCache.getCachedAddress(host)
 
         if address != None:
+            logging.debug("Host cached.")
             return defer.succeed(address)
         else:
+            logging.debug("Host not cached.")
             return reactor.resolve(host)
 
     def process(self):
+        logging.debug("Resolving host: %s" % (self.getHeader('host')))
         host     = self.getHeader('host')               
         deferred = self.resolveHost(host)
 
