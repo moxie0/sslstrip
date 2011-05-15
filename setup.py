@@ -5,7 +5,7 @@ from distutils.core import setup, Extension
 shutil.copyfile("sslstrip.py", "sslstrip/sslstrip")
 
 setup  (name        = 'sslstrip',
-        version     = '0.8',
+        version     = '0.9',
         description = 'A MITM tool that implements Moxie Marlinspike\'s HTTPS stripping attacks.',
         author = 'Moxie Marlinspike',
         author_email = 'moxie@thoughtcrime.org',
