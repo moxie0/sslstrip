@@ -16,7 +16,7 @@
 # USA
 #
 
-import logging, re, string, random
+import logging, re, string, random, zlib, gzip, StringIO
 
 from twisted.web.http import HTTPClient
 from URLMonitor import URLMonitor
@@ -40,6 +40,7 @@ class ServerConnection(HTTPClient):
         self.client           = client
         self.urlMonitor       = URLMonitor.getInstance()
         self.isImageRequest   = False
+        self.isCompressed     = False
         self.contentLength    = None
         self.shutdownComplete = False
 
@@ -87,7 +88,11 @@ class ServerConnection(HTTPClient):
                 self.isImageRequest = True
                 logging.debug("Response is image content, not scanning...")
 
-        if (key.lower() == 'content-length'):
+        if (key.lower() == 'content-encoding'):
+            if (value.find('gzip') != -1):
+                logging.debug("Response is compressed...")
+                self.isCompressed = True
+        elif (key.lower() == 'content-length'):
             self.contentLength = value
         elif (key.lower() == 'set-cookie'):
             self.client.responseHeaders.addRawHeader(key, value)
@@ -114,6 +119,10 @@ class ServerConnection(HTTPClient):
             HTTPClient.handleResponseEnd(self)
 
     def handleResponse(self, data):
+        if (self.isCompressed):
+            logging.debug("Decompressing content...")
+            data = gzip.GzipFile('', 'rb', 9, StringIO.StringIO(data)).read()
+            
         logging.log(self.getLogLevel(), "Read from server:\n" + data)
 
         data = self.replaceSecureLinks(data)
