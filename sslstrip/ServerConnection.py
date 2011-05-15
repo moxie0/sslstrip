@@ -55,6 +55,7 @@ class ServerConnection(HTTPClient):
 
     def sendHeaders(self):
         for header, value in self.headers.items():
+            logging.log(self.getLogLevel(), "Sending header: %s : %s" % (header, value))
             self.sendHeader(header, value)
 
         self.endHeaders()
@@ -64,6 +65,7 @@ class ServerConnection(HTTPClient):
         self.transport.write(self.postData)
 
     def connectionMade(self):
+        logging.log(self.getLogLevel(), "HTTP connection made.")
         self.sendRequest()
         self.sendHeaders()
         
@@ -87,6 +89,8 @@ class ServerConnection(HTTPClient):
 
         if (key.lower() == 'content-length'):
             self.contentLength = value
+        elif (key.lower() == 'set-cookie'):
+            self.client.responseHeaders.addRawHeader(key, value)
         else:
             self.client.setHeader(key, value)
 
