@@ -1,3 +1,4 @@
+#!/usr/bin/env python
 import sys, os, shutil
 from distutils.core import setup, Extension
 
