@@ -30,6 +30,7 @@ from twisted.internet import reactor
 from sslstrip.StrippingProxy import StrippingProxy
 from sslstrip.URLMonitor import URLMonitor
 from sslstrip.CookieCleaner import CookieCleaner
+from sslstrip.HTMLInjector import HTMLInjector
 
 import sys, getopt, logging, traceback, string, os
 
@@ -91,6 +92,13 @@ def main(argv):
         
     logging.basicConfig(level=logLevel, format='%(asctime)s %(message)s',
                         filename=logFile, filemode='w')
+
+    try:
+        # make the file a command line option?
+        with open('injection.txt', 'r') as f:
+            HTMLInjector.getInstance().setInjectionCode(f.read())
+    except IOError as e:
+        logging.warning("Couldn't read injection.txt")
 
     URLMonitor.getInstance().setFaviconSpoofing(spoofFavicon)
     CookieCleaner.getInstance().setEnabled(killSessions)
