@@ -112,8 +112,10 @@ class ClientRequest(Request):
 
     def handleHostResolvedError(self, error):
         logging.warning("Host resolution error: " + str(error))
-        if not self.finished:
+        try:
             self.finish()
+        except RuntimeError:
+            pass
 
     def resolveHost(self, host):
         address = self.dnsCache.getCachedAddress(host)
@@ -152,8 +154,10 @@ class ClientRequest(Request):
         for header in expireHeaders:
             self.setHeader("Set-Cookie", header)
 
-        if not self.finished:
-            self.finish()        
+        try:
+            self.finish()
+        except RuntimeError:
+            pass
         
     def sendSpoofedFaviconResponse(self):
         icoFile = open(self.getPathToLockIcon())
@@ -163,5 +167,8 @@ class ClientRequest(Request):
         self.write(icoFile.read())
                 
         icoFile.close()
-        if not self.finished:
+
+        try:
             self.finish()
+        except RuntimeError:
+            pass
