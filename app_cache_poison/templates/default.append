@@ -1,2 +1,2 @@
-<h1>Squid-imposter works!</h1>
-<p><code>%%payload%%</code> page is spoofed by squid-imposter, but this is just a default content. To replace it, create <code>%%site%%.append</code> or <code>%%site%%.payload</code> file and add your content there.</p>
+<h1>AppCache Poison works!</h1>
+<p><code>%%tamper_url%%</code> page is spoofed by AppCache Poison, but this is just a default content. To replace it, create appropriate files in your templates directory and add your content there.</p>

@@ -1,6 +1,6 @@
 CACHE MANIFEST
 CACHE:
-%%payload%%
+%%tamper_url%%
 NETWORK:
 *
 http://*
