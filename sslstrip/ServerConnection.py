@@ -20,7 +20,7 @@ import logging, re, string, random, zlib, gzip, StringIO
 
 from twisted.web.http import HTTPClient
 from URLMonitor import URLMonitor
-from ResponseTamperer import ResponseTamperer
+from ResponseTampererFactory import ResponseTampererFactory
 
 class ServerConnection(HTTPClient):
 
@@ -40,7 +40,7 @@ class ServerConnection(HTTPClient):
         self.headers          = headers
         self.client           = client
         self.urlMonitor       = URLMonitor.getInstance()
-        self.responseTamperer = ResponseTamperer.getInstance()
+        self.responseTamperer = ResponseTampererFactory.getTampererInstance()
         self.isImageRequest   = False
         self.isCompressed     = False
         self.contentLength    = None

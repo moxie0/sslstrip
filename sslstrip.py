@@ -30,7 +30,7 @@ from twisted.internet import reactor
 from sslstrip.StrippingProxy import StrippingProxy
 from sslstrip.URLMonitor import URLMonitor
 from sslstrip.CookieCleaner import CookieCleaner
-from sslstrip.ResponseTamperer import ResponseTamperer
+from sslstrip.ResponseTampererFactory import ResponseTampererFactory
 
 import sys, getopt, logging, traceback, string, os
 
@@ -99,7 +99,7 @@ def main(argv):
 
     URLMonitor.getInstance().setFaviconSpoofing(spoofFavicon)
     CookieCleaner.getInstance().setEnabled(killSessions)
-    ResponseTamperer.getInstance().setConfigFile(tamperConfigFile)
+    ResponseTampererFactory.buildTamperer(tamperConfigFile)
     strippingFactory              = http.HTTPFactory(timeout=10)
     strippingFactory.protocol     = StrippingProxy
 

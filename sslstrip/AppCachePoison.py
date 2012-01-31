@@ -17,40 +17,22 @@
 #
 
 import logging
+from sslstrip.DummyResponseTamperer import DummyResponseTamperer
 
-class ResponseTamperer:
+class AppCachePoison(DummyResponseTamperer):
 
     '''
-    ResponseTamperer allows to modify responses to clients.
+    AppCachePosion performs HTML5 AppCache poisioning attack
     '''
-
-    _instance          = None
-
-    _default_config = {"enabled": False}
-
-    def __init__(self):
-        self.config       = ResponseTamperer._default_config
-
-    def getLogLevel(self):
-        return logging.DEBUG
-
-    def setConfigFile(self, configFile):
-        logging.log(self.getLogLevel(), "Reading tamper config file: %s"  % (configFile))
-        self.config.update(self.parseConfig(configFile))
-        if self.isEnabled():
-          logging.log(self.getLogLevel(), "Tampering enabled.")
-
-    def parseConfig(self, configFile):
-        # todo read config file
-        readConfig = {"enabled": True}
-        return readConfig
-
-    def isEnabled(self):
-        return self.config["enabled"]
+    def __init__(self, config):
+        self.config = config
+        logging.log(logging.DEBUG, "Tampering enabled.")
 
     def tamper(self, url, data, headers, req_headers):
         if not self.isEnabled():
           return data
+          
+        
 
         # headers manipulation - see http://twistedmatrix.com/documents/10.1.0/api/twisted.web.http_headers.Headers.html
         # setting headers
@@ -58,12 +40,5 @@ class ResponseTamperer:
         # getting headers
         #headers.getRawHeaders("Content-Type")
 
-        return data
+        return data+repr(self.config)
 
-    def getInstance():
-        if ResponseTamperer._instance == None:
-            ResponseTamperer._instance = ResponseTamperer()
-
-        return ResponseTamperer._instance
-
-    getInstance = staticmethod(getInstance)
