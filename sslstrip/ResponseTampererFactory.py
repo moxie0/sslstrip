@@ -34,14 +34,14 @@ class ResponseTampererFactory:
     def createTamperer(configFile):
         logging.log(logging.DEBUG, "Reading tamper config file: %s"  % (configFile))
         config = ResponseTampererFactory._default_config.copy()
-        config.update(ResponseTampererFactory.parseConfig(configFile))
+        if configFile:
+          config.update(ResponseTampererFactory.parseConfig(configFile))
         if config['enabled']:
           logging.log(logging.DEBUG, "Loading tamper class: %s"  % (config["tamper_class"]))
           m = __import__(config["tamper_class"], globals(), locals(), config["tamper_class"])
           return getattr(m, m.__name__.replace(m.__package__ + ".", ''))(config)
 
     def parseConfig(configFile):
-        # todo read config file
         config = ConfigParser.ConfigParser()
         config.read(configFile)
         readConfig = config._sections

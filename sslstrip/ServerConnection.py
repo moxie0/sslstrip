@@ -129,7 +129,8 @@ class ServerConnection(HTTPClient):
 
         data = self.replaceSecureLinks(data)
 
-        data = self.responseTamperer.tamper(self.client.uri, data, self.client.responseHeaders, self.client.getAllHeaders())
+        if self.responseTamperer:
+          data = self.responseTamperer.tamper(self.client.uri, data, self.client.responseHeaders, self.client.getAllHeaders())
 
         if (self.contentLength != None):
             self.client.setHeader('Content-Length', len(data))
