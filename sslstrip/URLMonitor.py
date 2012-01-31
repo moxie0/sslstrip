@@ -32,6 +32,7 @@ class URLMonitor:
     def __init__(self):
         self.strippedURLs       = set()
         self.strippedURLPorts   = {}
+        self.redirects          = {}
         self.faviconReplacement = False
 
     def isSecureLink(self, client, url):
@@ -46,7 +47,15 @@ class URLMonitor:
             return self.strippedURLPorts[(client,url)]
         else:
             return 443
-
+            
+    def addRedirection(self, from_url, to_url):
+        self.redirects[to_url] = self.getRedirectionSource(from_url)
+    
+    def getRedirectionSource(self, url):
+        if url in self.redirects:
+            return self.redirects[url] # return redirection source
+        return url
+    
     def addSecureLink(self, client, url):
         methodIndex = url.find("//") + 2
         method      = url[0:methodIndex]

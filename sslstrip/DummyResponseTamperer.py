@@ -17,6 +17,7 @@
 #
 
 import logging
+from sslstrip.URLMonitor import URLMonitor
 
 class DummyResponseTamperer:
 
@@ -26,6 +27,7 @@ class DummyResponseTamperer:
 
     def __init__(self, config):
         self.config = config
+        self.urlMonitor = URLMonitor.getInstance()
         logging.log(logging.DEBUG, "Tampering enabled.")
 
     def isEnabled(self):

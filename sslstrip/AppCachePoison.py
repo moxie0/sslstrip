@@ -28,14 +28,13 @@ class AppCachePoison(DummyResponseTamperer):
     '''
     AppCachePosion performs HTML5 AppCache poisioning attack - see http://blog.kotowicz.net/2010/12/squid-imposter-phishing-websites.html
     '''
-    def __init__(self, config):
-        self.config = config
-        logging.log(logging.DEBUG, "Tampering enabled.")
-
+    
     def tamper(self, url, data, headers, req_headers):
         if not self.isEnabled():
           return data
           
+        url = self.urlMonitor.getRedirectionSource(url)
+        
         (s,element) = self.getSectionForUrl(url)
         if not s:
           return data
