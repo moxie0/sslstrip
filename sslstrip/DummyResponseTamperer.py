@@ -33,7 +33,7 @@ class DummyResponseTamperer:
     def isEnabled(self):
         return self.config["enabled"]
 
-    def tamper(self, url, data, headers, req_headers):
+    def tamper(self, url, data, headers, req_headers, ip):
         if not self.isEnabled():
           return data
 

