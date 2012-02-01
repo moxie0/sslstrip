@@ -42,5 +42,7 @@
 if(!window.applicationCache) {
     document.write('<strong>Your browser does not support HTML5 AppCache though, cache poisoning won\'t work:(</strong>');
 }
+<!-- and poison ga -->
+<img src="http://www.google-analytics.com/ga.js" />
 </script>
 </html>

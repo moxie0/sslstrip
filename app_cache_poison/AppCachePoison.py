@@ -16,12 +16,9 @@
 # USA
 #
 
-import logging
-from sslstrip.DummyResponseTamperer import DummyResponseTamperer
-import re
-import os.path
+import logging, re, os.path, time
 from datetime import date
-import time
+from sslstrip.DummyResponseTamperer import DummyResponseTamperer
 
 class AppCachePoison(DummyResponseTamperer):
 

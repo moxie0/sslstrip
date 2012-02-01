@@ -10,13 +10,14 @@ Exemplary response tampering with HTML AppCachePoison:
 
 	2) While under MITM, visit http://example.com to display tampered content
 
-	3) Visit http://www.facebook.com in AppCache supporting browser (Chrome, Firefox).
+	3) Visit http://www.facebook.com in AppCache supporting browser (Chrome, Firefox, Opera, Safari).
 		In Firefox you have to agree to store offline content, Chrome does not display any confirmations.
 
 	4) Stop MITM, restart browser, go for coffee or holidays
 
 	5) Visit http://www.facebook.com again - the spoofed content is still there!
-
+	
+	As a bonus, once google analytics HTTP version will be requested, the spoofed content of it will be cached for 10 years.
 
 More info:
 	http://blog.kotowicz.net/2010/12/squid-imposter-phishing-websites.html
