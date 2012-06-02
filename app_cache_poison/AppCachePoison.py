@@ -47,7 +47,7 @@ class AppCachePoison(DummyResponseTamperer):
         logging.log(logging.WARNING, "Found URL %s in section %s" % (url, s['__name__']))
         p = self.getTemplatePrefix(s)
         if element == 'tamper':
-          logging.log(logging.WARNING, "Poisoning tamper URL")
+          logging.log(logging.WARNING, "Poisoning tamper URL with template %s" % (p))
           if os.path.exists(p + '.replace'): # replace whole content
             f = open(p + '.replace','r')
             data = self.decorate(f.read(), s)
