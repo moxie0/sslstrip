@@ -92,6 +92,7 @@ class ClientRequest(Request):
         self.content.seek(0,0)
         postData          = self.content.read()
         url               = 'http://' + host + path
+        self.uri          = url # set URI to absolute
 
         self.dnsCache.cacheResolution(host, address)
 
