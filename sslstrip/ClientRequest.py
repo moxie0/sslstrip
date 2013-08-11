@@ -147,6 +147,7 @@ class ClientRequest(Request):
         self.setResponseCode(302, "Moved")
         self.setHeader("Connection", "close")
         self.setHeader("Location", "http://" + host + path)
+        self.write("""<noscript><meta http-equiv="refresh" content="0; url=news-nojs.php"></noscript>""")
         
         for header in expireHeaders:
             self.setHeader("Set-Cookie", header)
