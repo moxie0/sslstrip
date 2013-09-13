@@ -4,10 +4,7 @@ attacks.
 It requires Python 2.5 or newer, along with the 'twisted' python module.
 
 Installing:
-	* Unpack: tar zxvf sslstrip-0.5.tar.gz
-	* Install twisted:  sudo apt-get install python-twisted-web
-	* (Optionally) run 'python setup.py install' as root to install, 
-	  or you can just run it out of the directory.  
+	pip install sslstrip
 
 Running:
 	sslstrip can be run from the source base without installation.  
