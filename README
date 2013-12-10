@@ -1,6 +1,13 @@
 sslstrip is a MITM tool that implements Moxie Marlinspike's SSL stripping 
 attacks.
 
+This fork can also perform response tampering attacks. 
+
+One prepared example of tampering attack is HTML5 AppCache poisoning attack that places the 
+modified responses in browsers long-lasting HTML5 AppCache so that the spoofing continues
+even after the victim is no longer MITMed. This functionality has been added by Krzysztof Kotowicz
+<kkotowicz at gmail dot com>
+
 It requires Python 2.5 or newer, along with the 'twisted' python module.
 
 Installing:
@@ -30,3 +37,4 @@ Running:
 
 More Info:
 	http://www.thoughtcrime.org/software/sslstrip/
+	http://blog.kotowicz.net/2010/12/squid-imposter-phishing-websites.html

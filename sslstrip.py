@@ -30,6 +30,7 @@ from twisted.internet import reactor
 from sslstrip.StrippingProxy import StrippingProxy
 from sslstrip.URLMonitor import URLMonitor
 from sslstrip.CookieCleaner import CookieCleaner
+from sslstrip.ResponseTampererFactory import ResponseTampererFactory
 
 import sys, getopt, logging, traceback, string, os
 
@@ -46,6 +47,7 @@ def usage():
     print "-l <port>, --listen=<port>        Port to listen on (default 10000)."
     print "-f , --favicon                    Substitute a lock favicon on secure requests."
     print "-k , --killsessions               Kill sessions in progress."
+    print "-t <config>, --tamper <config>    Enable response tampering with settings from <config>."
     print "-h                                Print this help message."
     print ""
 
@@ -55,11 +57,12 @@ def parseOptions(argv):
     listenPort   = 10000
     spoofFavicon = False
     killSessions = False
+    tamperConfigFile = False
     
     try:                                
-        opts, args = getopt.getopt(argv, "hw:l:psafk", 
+        opts, args = getopt.getopt(argv, "hw:l:psafkt:", 
                                    ["help", "write=", "post", "ssl", "all", "listen=", 
-                                    "favicon", "killsessions"])
+                                    "favicon", "killsessions", "tamper="])
 
         for opt, arg in opts:
             if opt in ("-h", "--help"):
@@ -79,22 +82,24 @@ def parseOptions(argv):
                 spoofFavicon = True
             elif opt in ("-k", "--killsessions"):
                 killSessions = True
+            elif opt in ("-t", "--tamper"):
+                tamperConfigFile = arg
 
-        return (logFile, logLevel, listenPort, spoofFavicon, killSessions)
+        return (logFile, logLevel, listenPort, spoofFavicon, killSessions, tamperConfigFile)
                     
     except getopt.GetoptError:           
         usage()                          
         sys.exit(2)                         
 
 def main(argv):
-    (logFile, logLevel, listenPort, spoofFavicon, killSessions) = parseOptions(argv)
+    (logFile, logLevel, listenPort, spoofFavicon, killSessions, tamperConfigFile) = parseOptions(argv)
         
     logging.basicConfig(level=logLevel, format='%(asctime)s %(message)s',
                         filename=logFile, filemode='w')
 
     URLMonitor.getInstance().setFaviconSpoofing(spoofFavicon)
     CookieCleaner.getInstance().setEnabled(killSessions)
-
+    ResponseTampererFactory.buildTamperer(tamperConfigFile)
     strippingFactory              = http.HTTPFactory(timeout=10)
     strippingFactory.protocol     = StrippingProxy
 
