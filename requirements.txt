@@ -1,0 +1,16 @@
+asn1crypto==0.24.0
+attrs==17.4.0
+Automat==0.6.0
+cffi==1.11.5
+constantly==15.1.0
+cryptography==2.2.2
+enum34==1.1.6
+hyperlink==18.0.0
+idna==2.6
+incremental==17.5.0
+ipaddress==1.0.22
+pycparser==2.18
+pyOpenSSL==17.5.0
+six==1.11.0
+Twisted==13.1.0
+zope.interface==4.5.0
