@@ -59,7 +59,7 @@ def parseOptions(argv):
     try:                                
         opts, args = getopt.getopt(argv, "hw:l:psafk", 
                                    ["help", "write=", "post", "ssl", "all", "listen=", 
-                                    "favicon", "killsessions"])
+                                     "favicon", "killsessions"])
 
         for opt, arg in opts:
             if opt in ("-h", "--help"):
